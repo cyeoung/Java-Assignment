@@ -1,7 +1,12 @@
 package Tanks;
-
 import processing.core.PApplet;
 import processing.core.PImage;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class Board {
     private int rows = 20; // Fixed row count based on the level file format
@@ -26,24 +31,29 @@ public class Board {
         this.windImage = windImage;
         this.wind1Image = wind1Image;
         this.layout = new char[rows][cols];
-        loadLayout(layoutString, cellSize, app);
+        //loadLayout(layoutString, cellSize, app);
         smoothTerrain();
     }
 
-    private void loadLayout(String layoutString, int cellSize, App app) {
-        String[] lines = layoutString.split("\\r?\\n");
-        for (int row = 0; row < rows && row < lines.length; row++) {
-            String line = lines[row];
-            for (int col = 0; col < cols && col < line.length(); col++) {
-                char c = line.charAt(col);
-                layout[row][col] = c;
+    public boolean loadLayout(String layoutFile) {
+        try {
+            Scanner sc = new Scanner(new File(layoutFile));
+            for (int row = 0; row < rows; row++) {
+                String line = sc.nextLine();
+                int length = line.length();
 
-                if (c == 'T' || c == 't') {
-                    int x = col * cellSize + (int) (Math.random() * 30 - 15); // Randomize position within +/- 30 pixels
-                    int y = row * cellSize + App.TOPBAR + (int) (Math.random() * 30 - 15);
-                    app.image(c == 'T' ? treeImage1 : treeImage2, x, y);
+                for (int col = 0; col < length; col++) {
+                    layout[row][col] = line.charAt(col);
+                }
+                // If the line has fewer characters than 20, pad the remainder with ' '
+                for (int col = length; col < cols; col++) {
+                    layout[row][col] = ' ';
                 }
             }
+            return true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -54,98 +64,6 @@ public class Board {
     private void smoothTerrain() {
         // Implement terrain smoothing algorithm here
         // ...
-    }
-
-    public void drawMap(App app) {
-        app.image(backgroundImage, 0, 0);
-
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-                int x = col * App.CELLSIZE;
-                int y = row * App.CELLSIZE + App.TOPBAR;
-
-                switch (layout[row][col]) {
-                    case 'F':
-                        app.image(fuelImage, x, y);
-                        break;
-                    case 'H':
-                        app.image(hillsImage, x, y);
-                        break;
-                    case 'W':
-                        app.image(windImage, x, y);
-                        break;
-                    case 'w':
-                        app.image(wind1Image, x, y);
-                        break;
-                    // Add more cases for other layout characters
-                }
-            }
-        }
-    }
-    /**
-     * Retrieves the characters of the cells that have been drawn on the board.
-     * This is primarily used for testing purposes to verify the drawn layout.
-     *
-     * @return a list of characters representing the drawn cells
-     */
-    public List<Character> getDrawnCells() {
-        return drawnCells;
-    }
-
-    /**
-     * Draws the wizard house on the board if the corresponding cell is present in the layout.
-     *
-     * @param app the PApplet context on which the wizard house is to be drawn
-     * @return true if the wizard house is drawn, false otherwise
-     */
-
-    public void drawTanks(PApplet app, PImage tankImage) {
-        for (int row = 0; row < this.rows; row++) {
-            for (int col = 0; col < this.cols; col++) {
-                int x = col * App.CELLSIZE;
-                int y = row * App.CELLSIZE + App.TOPBAR;
-    
-                char c = layout[row][col];
-                if (Character.isLetter(c) && Character.isUpperCase(c)) {
-                    // Draw tank image for player represented by the uppercase letter
-                    app.image(tankImage, x, y);
-                }
-            }
-        }
-    }
-}
-/*
-private char[][] layout;
-    private PImage backgroundImage;
-    private PImage treeImage1;
-    private List<Character> drawnCells = new ArrayList<>();
-
-    public Board(int cellSize, PApplet app, String layoutString, PImage backgroundImage, PImage treeImage1) {
-        this.backgroundImage = backgroundImage;
-        this.treeImage1 = treeImage1;
-        this.layout = new char[rows][cols];
-        loadLayout(layoutString, cellSize, app);
-    }
-
-    private void loadLayout(String layoutString, int cellSize, PApplet app) {
-        String[] lines = layoutString.split("\\r?\\n");
-        for (int row = 0; row < rows && row < lines.length; row++) {
-            String line = lines[row];
-            for (int col = 0; col < cols && col < line.length(); col++) {
-                char c = line.charAt(col);
-                layout[row][col] = c;
-
-                if (c == 'T' || c == 't') {
-                    int x = col * cellSize + (int) (Math.random() * 30 - 15); // Randomize position within +/- 30 pixels
-                    int y = row * cellSize + (int) (Math.random() * 30 - 15);
-                    app.image(treeImage1, x, y);
-                }
-            }
-        }
-    }
-
-    public char[][] getLayout() {
-        return layout;
     }
 
     public void drawMap(PApplet app, int cellSize) {
@@ -181,5 +99,6 @@ private char[][] layout;
     public List<Character> getDrawnCells() {
         return drawnCells;
     }
-} 
-*/
+}
+
+
