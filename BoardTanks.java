@@ -15,6 +15,8 @@ public class Board {
     private PImage windImage;
     private PImage wind1Image;
 
+    private List<Character> drawnCells = new ArrayList<>();
+
     public Board(int cellSize, App app, String layoutString, PImage backgroundImage, PImage fuelImage, PImage hillsImage, PImage treeImage1, PImage treeImage2, PImage windImage, PImage wind1Image) {
         this.backgroundImage = backgroundImage;
         this.fuelImage = fuelImage;
@@ -112,3 +114,72 @@ public class Board {
         }
     }
 }
+/*
+private char[][] layout;
+    private PImage backgroundImage;
+    private PImage treeImage1;
+    private List<Character> drawnCells = new ArrayList<>();
+
+    public Board(int cellSize, PApplet app, String layoutString, PImage backgroundImage, PImage treeImage1) {
+        this.backgroundImage = backgroundImage;
+        this.treeImage1 = treeImage1;
+        this.layout = new char[rows][cols];
+        loadLayout(layoutString, cellSize, app);
+    }
+
+    private void loadLayout(String layoutString, int cellSize, PApplet app) {
+        String[] lines = layoutString.split("\\r?\\n");
+        for (int row = 0; row < rows && row < lines.length; row++) {
+            String line = lines[row];
+            for (int col = 0; col < cols && col < line.length(); col++) {
+                char c = line.charAt(col);
+                layout[row][col] = c;
+
+                if (c == 'T' || c == 't') {
+                    int x = col * cellSize + (int) (Math.random() * 30 - 15); // Randomize position within +/- 30 pixels
+                    int y = row * cellSize + (int) (Math.random() * 30 - 15);
+                    app.image(treeImage1, x, y);
+                }
+            }
+        }
+    }
+
+    public char[][] getLayout() {
+        return layout;
+    }
+
+    public void drawMap(PApplet app, int cellSize) {
+        drawnCells.clear();
+        app.image(backgroundImage, 0, 0);
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                int x = col * cellSize;
+                int y = row * cellSize;
+
+                switch (layout[row][col]) {
+                    case ' ':
+                        // Draw a white cell (blank space)
+                        app.fill(255); // Set fill color to white
+                        app.rect(x, y, cellSize, cellSize); // Draw a white rectangle
+                        drawnCells.add(' '); // Add blank space character to the list of drawn cells
+                        break;
+                    case 'X':
+                        app.line(x, y, x + cellSize, y + cellSize);
+                        app.line(x + cellSize, y, x, y + cellSize);
+                        break;
+                    case 'T':
+                        // You can add the image drawing logic here for other characters like 'T'
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    public List<Character> getDrawnCells() {
+        return drawnCells;
+    }
+} 
+*/
