@@ -1,437 +1,94 @@
-// package Tanks;
+package WizardTD;
 
-// import java.io.BufferedReader;
-// import java.io.FileReader;
-// import java.io.IOException;
-// import java.util.ArrayList;
-// import java.util.HashMap;
-// import java.util.List;
-// import java.util.Map;
-// import java.util.Random;
-// import java.nio.file.Files;
-// import java.nio.file.Paths;
-
-// import processing.core.PApplet;
-// import processing.core.PVector;
-// import processing.core.PImage;
-// import processing.data.JSONObject;
-// import processing.data.JSONArray;
-// import processing.event.KeyEvent;
-// import processing.event.MouseEvent;
-
-
-// public class App extends PApplet {
-
-//     private String URLBasic = "/Users/cyeoungjpg/Desktop/tanks_scaffold/src/main/resources/Tanks/basic.png";
-//     private PImage backgroundImgBasic;
-
-//     public static final int CELLSIZE = 32; // 8;
-//     public static final int CELLHEIGHT = 32;
-//     public static final int CELLAVG = 32;
-//     public static final int TOPBAR = 0;
-//     public static int WIDTH = 864; // CELLSIZE*BOARD_WIDTH;
-//     public static int HEIGHT = 640; // BOARD_HEIGHT*CELLSIZE+TOPBAR;
-//     public static final int BOARD_WIDTH = WIDTH / CELLSIZE;
-//     public static final int BOARD_HEIGHT = 20;
-//     public static final int INITIAL_PARACHUTES = 1;
-//     public static final int FPS = 30;
-//     public String configPath;
-//     public static Random random = new Random();
-
-//     private boolean upPressed = false;
-//     private boolean downPressed = false;
-//     private boolean leftPressed = false;
-//     private boolean rightPressed = false;
-//     private boolean wPressed = false;
-//     private boolean sPressed = false;
-//     private boolean spacePressed = false;
-
-//     private float turretRotation = 0; // in radians
-//     private float tankPositionX = 0;
-//     private float tankPositionY = 0;
-
-//     private int player1Parachutes = 3;
-//     private int player2Parachutes = 3;
-
-//     private Map<Character, List<PVector>> positions = new HashMap<>();
-
-//     public static final String FILE_PATH1 = "tanks/level1.txt";
-//     public static final String FILE_PATH2 = "tanks/level2.txt";
-//     public static final String FILE_PATH3 = "tanks/level3.txt";
-//     private static final int INITIAL_FUEL = 250;
-//     private static final int INITIAL_HEALTH = 100;
-//     private static final int INITIAL_POWER = 50;
-
-//     private String[] levelLayout;
-        
-//     int tankFuel = INITIAL_FUEL;
-//     int tankHealth = INITIAL_HEALTH;
-//     int turretPower = INITIAL_POWER;
-
-//     public void settings() {
-//         size(CELLSIZE * BOARD_WIDTH, CELLSIZE * BOARD_HEIGHT);
-//     }
-//     private int currentLevelIndex = 1;
-
-//     public void setup() {
-
-//         size();
-
-//         frameRate(FPS);
-//         JSONObject config = loadJSONObject("config.json");
-//         String level1LayoutFile = config.getJSONObject("levels").getString("layout");
-//         String[] level1Layout = loadStrings("level1.txt");
-//         String[] level2Layout = loadStrings("level2.txt");
-//         String[] level3Layout = loadStrings("level3.txt");
-
-//         Map<Integer, String[]> levelLayouts = new HashMap<>();
-//         levelLayouts.put(1, level1Layout);
-//         levelLayouts.put(2, level2Layout);
-//         levelLayouts.put(3, level3Layout);
-//         try {
-//             // Read the content of config.json file
-//             String content = new String(Files.readAllBytes(Paths.get("config.json")));
-            
-//             // Parse JSON content
-//             JSONObject json = new JSONObject(content);
-
-//             // Access levels array
-//             JSONArray levels = json.getJSONArray("levels");
-
-//             // Access player_colours object
-//             JSONObject playerColours = json.getJSONObject("player_colours");
-
-//             // Process levels
-//             for (int i = 0; i < levels.length(); i++) {
-//                 JSONObject level = levels.getJSONObject(i);
-
-//                 // Access level properties
-//                 String layout = level.getString("layout");
-//                 String background = level.getString("background");
-//                 String foregroundColour = level.getString("foreground-colour");
-//                 String trees = level.optString("trees", ""); // Optional field, use optString to handle missing keys
-
-//                 // Process each level data...
-//             }
-
-//             // Process player colours
-//             // You can access player colours using playerColours.getString("A") and so on
-
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-//         levelLayout = loadStrings(level1LayoutFile);
-//         readPositionsFromFile(FILE_PATH1);
-//     }
-
-//     public void keyPressed() {
-//         switch (keyCode) {
-//             case UP:
-//                 upPressed = true;
-//                 break;
-//             case DOWN:
-//                 downPressed = true;
-//                 break;
-//             case LEFT:
-//                 leftPressed = true;
-//                 break;
-//             case RIGHT:
-//                 rightPressed = true;
-//                 break;
-//         }
-
-//         switch (key) {
-//             case 'w':
-//             case 'W':
-//                 wPressed = true;
-//                 break;
-//             case 's':
-//             case 'S':
-//                 sPressed = true;
-//                 break;
-//             case ' ':
-//                 spacePressed = true;
-//                 break;
-//         }
-//     }
-
-//     public void keyReleased() {
-//         switch (keyCode) {
-//             case UP:
-//                 upPressed = false;
-//                 break;
-//             case DOWN:
-//                 downPressed = false;
-//                 break;
-//             case LEFT:
-//                 leftPressed = false;
-//                 break;
-//             case RIGHT:
-//                 rightPressed = false;
-//                 break;
-//         }
-
-//         switch (key) {
-//             case 'w':
-//             case 'W':
-//                 wPressed = false;
-//                 break;
-//             case 's':
-//             case 'S':
-//                 sPressed = false;
-//                 break;
-//             case ' ':
-//                 spacePressed = false;
-//                 break;
-//         }
-//     }
-
-//     public void mousePressed(MouseEvent e) {
-//         // Add functionality for mouse press event if needed
-//     }
-
-//     public void mouseReleased(MouseEvent e) {
-//         // Add functionality for mouse release event if needed
-//     }
-
-//     private boolean tankIsInMidair() {
-//         int tankColumn = (int) (tankPositionX / CELLSIZE); // Convert tank's x position to column index
-//         int tankRow = (int) (tankPositionY / CELLSIZE); // Convert tank's y position to row index
-    
-//         Object[] terrain;
-//         // Check if the tank is within the bounds of the terrain
-//         if (tankColumn < 0 || tankColumn >= terrain[0].length || tankRow < 0 || tankRow >= terrain.length) {
-//             return true; // Tank is outside terrain bounds, thus in midair
-//         }
-    
-//         // Check if there is terrain at the tank's position
-//         return terrain[tankRow][tankColumn] == 0; // Assuming 0 represents no terrain
-//     }
-
-//     public void updateTankPosition(){
-//         // Update tank position
-//         if (leftPressed && tankFuel > 0) {
-//             tankPositionX -= 60.0 / FPS;
-//             tankFuel--;
-//         }
-//         if (rightPressed && tankFuel > 0) {
-//             tankPositionX += 60.0 / FPS;
-//             tankFuel--;
-//         }
-//     }
-
-//     public void draw() {
-
-//         drawPositions();
-
-//         if (tankIsInMidair()) {
-//             deployParachute();
-//         }
-
-//         updateTankPosition();
-
-//         // Update turret rotation
-//         if (upPressed) {
-//             turretRotation += 3 * (PI / FPS);
-//         }
-//         if (downPressed) {
-//             turretRotation -= 3 * (PI / FPS);
-//         }
-
-//         // Update turret power
-//         if (wPressed && turretPower < tankHealth) {
-//             turretPower += 36 / FPS;
-//         }
-//         if (sPressed && turretPower > 0) {
-//             turretPower -= 36 / FPS;
-//         }
-       
-//         drawTank(tankPositionX, tankPositionY, turretRotation);
-
-//         // Display HUD
-//         fill(0);
-//         textSize(16);
-//         text("Fuel: " + tankFuel, 10, 20);
-//         text("Health: " + tankHealth, 10, 40);
-//         text("Power: " + (int) turretPower, 10, 60);
-//     }
-
-//     private void drawParachute(float tankX, float tankY) {
-//         // Draw parachute above the tank
-//         float parachuteX = tankX;
-//         float parachuteY = tankY - 40; // Adjust the distance above the tank
-
-//         // Draw parachute canopy
-//         fill(255, 0, 0); // Red color
-//         ellipse(parachuteX, parachuteY, 50, 20);
-
-//         // Draw parachute strings
-//         stroke(0); // Black color for strings
-//         line(parachuteX - 25, parachuteY, parachuteX - 25, parachuteY + 40); // Left string
-//         line(parachuteX + 25, parachuteY, parachuteX + 25, parachuteY + 40); // Right string
-//     }
-
-//     private void deployParachute() {
-//         if (tankFuel <= 0 && tankHealth > 0) {
-//             int currentPlayer;
-//             // Check if parachutes are available
-//             if (currentPlayer == 1 && player1Parachutes > 0) {
-//                 tankPositionY += 60 / FPS; // Descend with parachute
-//                 player1Parachutes--; // Deduct one parachute
-//             } else if (currentPlayer == 2 && player2Parachutes > 0) {
-//                 tankPositionY += 60 / FPS; // Descend with parachute
-//                 player2Parachutes--; // Deduct one parachute
-//             } else {
-//                 // Descend without parachute and sustain damage
-//                 tankPositionY += 120 / FPS;
-//                 tankHealth -= tankPositionY; // Damage based on height
-//             }
-//         }
-//     }
-
-//     // Method to fire a projectile
-//     private void fireProjectile() {
-//         // Calculate velocity magnitude based on power level
-//         float velocityMagnitude = map(turretPower, 0, tankHealth, 1, 9);
-
-//         // Calculate velocity components based on turret rotation
-//         float velocityX = velocityMagnitude * cos(turretRotation);
-//         float velocityY = velocityMagnitude * sin(turretRotation);
-
-//         // Create projectile object with initial position and velocity
-//         Projectile projectile = new Projectile(tankPositionX, tankPositionY, velocityX, velocityY);
-
-//         // Add projectile to list of active projectiles
-//         activeProjectiles.add(projectile);
-
-//         // End player's turn
-//         endPlayerTurn();
-//     }
-
-//     public void drawTank(float x, float y, float rotationAngle) {
-//         pushMatrix();
-//         translate(x, y);
-//         rotate(rotationAngle);
-
-//         // Body
-//         fill(255, 0, 0); // Red color for the tank body
-//         rect(-20, -10, 40, 20); // Rectangle representing the tank body
-
-//         // Turret
-//         fill(0, 0, 255); // Blue color for the turret
-//         rect(-5, -15, 10, 30); // Rectangle representing the tank turret
-
-//         // Gun
-//         fill(0); // Black color for the gun
-//         rect(0, -1, 20, 2); // Rectangle representing the tank gun
-
-//         popMatrix();
-//     }
-
-//     private void readPositionsFromFile(String filePath) {
-//         try {
-//             BufferedReader reader = new BufferedReader(new FileReader(filePath));
-//             String line;
-//             int y = 0;
-//             while ((line = reader.readLine()) != null) {
-//                 char[] chars = line.toCharArray();
-//                 for (int x = 0; x < chars.length; x++) {
-//                     char c = chars[x];
-//                     if (c != ' ') {
-//                         List<PVector> positionsList = positions.getOrDefault(c, new ArrayList<>());
-//                         positionsList.add(new PVector(x * CELLSIZE, y * CELLSIZE));
-//                         positions.put(c, positionsList);
-//                     }
-//                 }
-//                 y++;
-//             }
-//             reader.close();
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-//     }
-//     private void drawPositions() {
-//         for (Map.Entry<Character, List<PVector>> entry : positions.entrySet()) {
-//             char c = entry.getKey();
-//             List<PVector> positionsList = entry.getValue();
-//             switch (c) {
-//                 case 'T':
-//                     for (PVector position : positionsList) {
-//                         drawTank(position.x, position.y, 0);
-//                     }
-//                     break;
-//                 case 'X':
-//                     for (PVector position : positionsList) {
-//                         drawMountain(position.x, position.y);
-//                     }
-//                     break;
-//                 // Add cases for other characters as needed
-//             }
-//         }
-//     }
-
-//     public void drawMountain(float x, float y) {
-//         fill(100);  // Gray color for mountain
-//         triangle(x, y, x + 30, y - 60, x + 60, y);  // Triangle representing mountain
-//     }
-
-//     public static void main(String[] args) {
-//         PApplet.main("Tanks.App");
-//     }
-// }
-
-package Tanks;
-
-import org.checkerframework.checker.units.qual.A;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
-import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-import java.io.*;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.List;
-// import java.util.logging;
 
-public class App extends PApplet {
+/**
+ * The {@code App} class extends {@code PApplet} and implements {@code ImageRotator}, serving as the main class for the WizardTD game.
+ * It initializes and manages the game's graphical window, game elements, resources, and game logic. 
+ * It interacts with the player through mouse and keyboard inputs and renders game elements on the screen.
+ * This class also handles the game loop, updating the game state, and drawing the screen at a specified frame rate.
+ * 
+ * The game is grid-based, with different cells representing various in-game elements, including the player's towers, 
+ * enemy paths, and spawning points. The game progresses through waves of enemies with different attributes and behaviors.
+ * The player's objective is to strategically place and upgrade towers to prevent enemies from reaching the end of their path.
+ * 
+ * This class uses Processing library methods to create the game window, handle user inputs, and render game elements.
+ * The game's configuration, including the initial setup of towers and enemy waves, is loaded from a JSON file.
+ *
+ * @author Zhengyu Li
+ */
+public class App extends PApplet implements ImageRotator {
 
-    private String URLBasic = "/Users/cyeoungjpg/Desktop/tanks_scaffold/src/main/resources/Tanks/basic.png";
-    private PImage backgroundImgBasic;
+    public static final int CELLSIZE = 32;
+    public static final int SIDEBAR = 120;
+    public static final int TOPBAR = 40;
+    public static final int BOARD_WIDTH = 20;
 
-    public static final int CELLSIZE = 32; //8;
-    public static final int CELLHEIGHT = 32;
+    public static int WIDTH = CELLSIZE*BOARD_WIDTH+SIDEBAR;
+    public static int HEIGHT = BOARD_WIDTH*CELLSIZE+TOPBAR;
 
-    public static final int CELLAVG = 32;
-    public static final int TOPBAR = 0;
-    public static int WIDTH = 864; //CELLSIZE*BOARD_WIDTH;
-    public static int HEIGHT = 640; //BOARD_HEIGHT*CELLSIZE+TOPBAR;
-    public static final int BOARD_WIDTH = 29;
-    public static final int BOARD_HEIGHT = 22;
-
-    public static final int INITIAL_PARACHUTES = 1;
-
-    public static final int FPS = 30;
+    public static final int FPS = 60;
 
     public String configPath;
+    public JSONObject config;
 
-    public static Random random = new Random();
+    private PImage grass;
+    private PImage shrub;
+    private PImage path_0;
+    private PImage path_1;
+    private PImage path_2;
+    private PImage path_3;
+    private PImage gremlin;
+    private PImage gremlin_1;
+    private PImage gremlin_2;
+    private PImage gremlin_3;
+    private PImage gremlin_4;
+    private PImage gremlin_5;
+    private PImage beetle;
+    private PImage worm;
+    private PImage tower_0;
+    private PImage tower_1;
+    private PImage tower_2;
+    private PImage wizardHouse;
+    private PImage fireball;
+
+    private Mana mana;
+    private FreezePotions potions;
+
+    private Board board;
+    private char[][] layout;
+
+    private Waves waves;
+
+    private Towers towers;
+    private Tower hoveredTower;
+
+    private GameOptions gameOptions;
+
+    private boolean gameOver = false;
 	
 	// Feel free to add any additional methods or attributes you want. Please put classes in different files.
 
+    /**
+     * Constructor for creating an instance of the App class.
+     * Initializes the path to the configuration file for loading game settings.
+     */
     public App() {
         this.configPath = "config.json";
+    }
+
+    public JSONObject getConfig() {
+        return config;
     }
 
     /**
@@ -443,191 +100,220 @@ public class App extends PApplet {
     }
 
     /**
-     * Load all resources such as images. Initialise the elements such as the player and map elements.
+     * Load all resources such as images. Initialise the elements such as the player, enemies and map elements.
      */
 	@Override
     public void setup() {
-        backgroundImgBasic = loadImage(URLBasic, "png");
         frameRate(FPS);
-        String levelData = "X\nT\nX\nB T\nTT X X C\nXAXX X TX DX\nX XT X X X X X X\nX X T X\nXT X X X\nX X\nT\nX";
-        loadLevel("level1.txt");
-        JSONObject json = loadJSONObject("config.json");
 
-        // Get the levels array from the JSON object
-        JSONArray levelsArray = json.getJSONArray("levels");
+        // Load images during setup
+        this.grass = this.loadImage("src/main/resources/WizardTD/grass.png");
+        this.shrub = this.loadImage("src/main/resources/WizardTD/shrub.png");
+        this.path_0 = this.loadImage("src/main/resources/WizardTD/path0.png");
+        this.path_1 = this.loadImage("src/main/resources/WizardTD/path1.png");
+        this.path_2 = this.loadImage("src/main/resources/WizardTD/path2.png");
+        this.path_3 = this.loadImage("src/main/resources/WizardTD/path3.png");
+        this.tower_0 = this.loadImage("src/main/resources/WizardTD/tower0.png");
+        this.tower_1 = this.loadImage("src/main/resources/WizardTD/tower1.png");
+        this.tower_2 = this.loadImage("src/main/resources/WizardTD/tower2.png");
+        this.wizardHouse = this.loadImage("src/main/resources/WizardTD/wizard_house.png");
+        this.gremlin = this.loadImage("src/main/resources/WizardTD/gremlin.png");
+        this.gremlin_1 = this.loadImage("src/main/resources/WizardTD/gremlin1.png");
+        this.gremlin_2 = this.loadImage("src/main/resources/WizardTD/gremlin2.png");
+        this.gremlin_3 = this.loadImage("src/main/resources/WizardTD/gremlin3.png");
+        this.gremlin_4 = this.loadImage("src/main/resources/WizardTD/gremlin4.png");
+        this.gremlin_5 = this.loadImage("src/main/resources/WizardTD/gremlin5.png");
+        this.beetle = this.loadImage("src/main/resources/WizardTD/beetle.png");
+        this.worm = this.loadImage("src/main/resources/WizardTD/worm.png");
+        this.fireball = this.loadImage("src/main/resources/WizardTD/fireball.png");
 
-        // Get the first level object from the array
-        JSONObject level1 = levelsArray.getJSONObject(0);
+        this.config = loadJSONObject(configPath);
+        String layoutFile = config.getString("layout");
+        JSONArray wavesArray = config.getJSONArray("waves");
+        int initialTowerRange = config.getInt("initial_tower_range");
+        float initialTowerFiringSpeed = config.getFloat("initial_tower_firing_speed");
+        int initialTowerDamage = config.getInt("initial_tower_damage");
+        int towerCost = config.getInt("tower_cost");
+        float initialMana = config.getFloat("initial_mana");
+        float initialManaCap = config.getFloat("initial_mana_cap");
+        float initialManaGained = config.getFloat("initial_mana_gained_per_second");
+        float manaPollSpellInitialCost = config.getFloat("mana_pool_spell_initial_cost");
+        float manaPoolSpellCostIncreasePerUse = config.getFloat("mana_pool_spell_cost_increase_per_use");
+        float manaPoolSpellCapMultiplier = config.getFloat("mana_pool_spell_cap_multiplier");
+        float manaPoolSpellManaGainedMultiplier = config.getFloat("mana_pool_spell_mana_gained_multiplier");
 
-        // Extract the required properties for the first level
-        String layout = level1.getString("layout");
-        String background = level1.getString("background");
-        String foregroundColour = level1.getString("foreground-colour");
-        String trees = level1.getString("trees");
-        System.out.println(layout);
-		//See PApplet javadoc:
-		//loadJSONObject(configPath)
-		//loadImage(this.getClass().getResource(filename).getPath().toLowerCase(Locale.ROOT).replace("%20", " "));
+        this.mana = new Mana(initialMana, initialManaCap, initialManaGained, manaPollSpellInitialCost, manaPoolSpellCostIncreasePerUse, manaPoolSpellCapMultiplier, manaPoolSpellManaGainedMultiplier, this);
+        this.potions = new FreezePotions(mana);
+
+        this.board = new Board(20,20,this,layoutFile,this.grass,this.shrub,this.path_0,this.path_1,this.path_2,this.path_3,this.wizardHouse);
+        this.layout = this.board.getLayout();
+  
+        this.waves = new Waves(wavesArray,this.layout,this.mana,this.gremlin,this.gremlin_1,this.gremlin_2,this.gremlin_3,this.gremlin_4,this.gremlin_5,this.beetle,this.worm);
+
+        this.gameOptions = new GameOptions(towerCost, this.mana, this.potions);
+
+        this.towers = new Towers(this.mana, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerCost,this.layout, this.gameOptions, this.tower_0, this.tower_1, this.tower_2, this.fireball);
     }
+
 
     /**
      * Receive key pressed signal from the keyboard.
      */
 	@Override
-    public void keyPressed(KeyEvent event){
-        
+    public void keyPressed(){
+        if (!gameOver) {
+            gameOptions.handleKeyPressed(key);
+        } else if (key == 'r' || key == 'R') {
+            restartGame();
+        }
     }
 
     /**
-     * Receive key released signal from the keyboard.
+     * Receive mouse pressed signal.
      */
-	@Override
-    public void keyReleased(){
-        
-    }
-
     @Override
     public void mousePressed(MouseEvent e) {
-        //TODO - powerups, like repair and extra fuel and teleport
-
-
+        gameOptions.checkClick(mouseX, mouseY);
+        towers.click(mouseX, mouseY);
     }
 
+    /**
+     * Receive mouse moved signal.
+     */
     @Override
-    public void mouseReleased(MouseEvent e) {
-
+    public void mouseMoved() {
+        gameOptions.checkHover(mouseX, mouseY);
+        this.hoveredTower = towers.hover(mouseX, mouseY);
+        towers.hoverBuild(mouseX, mouseY);
     }
 
-    private int[][] terrain; // 2D array to store terrain heights
-
-    private void loadLevel(String fileName) {
-        List<String> terrainData = readTerrainData(fileName);
-        terrain = new int[BOARD_WIDTH][BOARD_HEIGHT];
-
-        for (int y = 0; y < BOARD_HEIGHT; y++) {
-            String line = terrainData.get(y);
-            for (int x = 0; x < line.length(); x++) {
-                char c = line.charAt(x);
-                System.out.println(c);
-                switch (c) {
-                    case 'X':
-                        terrain[x][y] = CELLHEIGHT; // Set terrain height to CELLHEIGHT
-                        break;
-                    case 'A':
-                        // Set position of player A's tank
-                        break;
-                    case 'B':
-                        // Set position of player A's tank
-                        break;
-                    case 'C':
-                        // Set position of player A's tank
-                        break;
-                    case 'D':
-                        // Set position of player A's tank
-                        break;
-                    case 'T':
-                        // Set position of tree, randomized within 30-pixel radius
-                        break;
-                    // Handle other cases for 'B', 'C', '0', '1', ...
-                    case ' ':
-                        // Leave as empty space
-                        break;
-                }
-            }
-        }
-
-        // Apply terrain smoothing algorithm
-        smoothTerrain();
+     /**
+     * Restarts the game, resetting the game over state and reinitializing 
+     * game elements to their default states.
+     */
+    private void restartGame() {
+        gameOver = false;
+        setup();
     }
-
-    private List<String> readTerrainData(String fileName) {
-        List<String> terrainData = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                terrainData.add(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return terrainData;
-    }
-
-    private void smoothTerrain() {
-        int[][] smoothedTerrain = new int[BOARD_WIDTH][BOARD_HEIGHT];
-    
-        // Apply moving average once
-        for (int y = 0; y < BOARD_HEIGHT; y++) {
-            for (int x = 0; x < BOARD_WIDTH; x++) {
-                int sum = 0;
-                int count = 0;
-                for (int i = -CELLAVG / 2; i <= CELLAVG / 2; i++) {
-                    int xPos = x + i;
-                    if (xPos >= 0 && xPos < BOARD_WIDTH) {
-                        sum += terrain[xPos][y];
-                        count++;
-                    }
-                }
-                smoothedTerrain[x][y] = sum / count;
-            }
-        }
-    
-        // Apply moving average again
-        for (int y = 0; y < BOARD_HEIGHT; y++) {
-            for (int x = 0; x < BOARD_WIDTH; x++) {
-                int sum = 0;
-                int count = 0;
-                for (int i = -CELLAVG / 2; i <= CELLAVG / 2; i++) {
-                    int xPos = x + i;
-                    if (xPos >= 0 && xPos < BOARD_WIDTH) {
-                        sum += smoothedTerrain[xPos][y];
-                        count++;
-                    }
-                }
-                terrain[x][y] = sum / count;
-            }
-        }
-    }
-
 
     /**
      * Draw all elements in the game by current frame.
      */
 	@Override
     public void draw() {
+        background(132, 115, 74);
 
-        image(backgroundImgBasic, 0, 0);
-
-        for (int x = 0; x < BOARD_WIDTH; x++) {
-            for (int y = 0; y < BOARD_HEIGHT; y++) {
-                int terrainHeight = terrain[x][y];
-                if (terrainHeight > 0) {
-                    fill(0); // Set the fill color to black
-                    rect(x * CELLSIZE, HEIGHT - TOPBAR - (y + 1) * CELLSIZE, CELLSIZE, terrainHeight);
+        if (!gameOver) {
+            if (!gameOptions.isPaused()) {
+                int updateTimes = 1;
+                if (gameOptions.isFastForward()) {
+                    updateTimes = 2;
+                }
+                for (int i = 0; i < updateTimes; i++) {
+                    this.mana.update();
+                    this.waves.update(this);
+                    List<Monster> activeMonsters = this.waves.getActiveMonsters();
+                    this.potions.setMonsters(activeMonsters);
+                    this.towers.update(activeMonsters);
+                    this.potions.update();
                 }
             }
+
+            this.mana.draw(this);
+            this.board.draw_map(this);
+            this.waves.draw(this);
+            this.gameOptions.draw(this);
+            this.towers.drawTowers(this);
+            this.potions.draw(this);
+
+            if (hoveredTower != null) {
+                this.towers.drawUpgradeBox(this, this.hoveredTower);
+                this.towers.drawAttackRange(this, hoveredTower);
+            }   
+
+            this.board.draw_wizard(this);
+        }else{
+            this.mana.draw(this);
+            this.board.draw_map(this);
+            this.waves.draw(this);
+            this.gameOptions.draw(this);
+            this.towers.drawTowers(this);
+            this.potions.draw(this);
+
+            if (hoveredTower != null) {
+                this.towers.drawUpgradeBox(this, this.hoveredTower);
+                this.towers.drawAttackRange(this, hoveredTower);
+            }
+
+            this.board.draw_wizard(this);
+        }
+
+        if (waves.getWon() || mana.getLose()) {
+            gameOver = true;
         }
         
-
-        //----------------------------------
-        //display HUD:
-        //----------------------------------
-        //TODO
-
-        //----------------------------------
-        //display scoreboard:
-        //----------------------------------
-        //TODO
-        
-		//----------------------------------
-        //----------------------------------
-
-        //TODO: Check user action
+        if (gameOver) {
+            this.pushStyle();
+           if (mana.getLose()) {
+                textSize(35);
+                textAlign(CENTER, CENTER);
+                text("YOU LOST", (width - 120) / 2, height / 2 - 132);
+                textSize(25);
+                text("Press 'r' to restart", (width - 120) / 2, height / 2 - 75);
+            } else if (waves.getWon()) {
+                textSize(35);
+                textAlign(CENTER, CENTER);
+                text("YOU WIN", (width - 120) / 2, height / 2 - 132);
+            }
+            this.popStyle();
+        }
     }
-
-
+    
+    /**
+     * The entry point of the application.
+     *
+     * @param args The command-line arguments.
+     */
     public static void main(String[] args) {
-        PApplet.main("Tanks.App");
+        PApplet.main("WizardTD.App");
     }
 
+    /**
+     * Source: https://stackoverflow.com/questions/37758061/rotate-a-buffered-image-in-java
+     * @param pimg The image to be rotated
+     * @param angle between 0 and 360 degrees
+     * @return the new rotated image
+     */
+    @Override
+    public PImage rotateImageByDegrees(PImage pimg, double angle) {
+        BufferedImage img = (BufferedImage) pimg.getNative();
+        double rads = Math.toRadians(angle);
+        double sin = Math.abs(Math.sin(rads)), cos = Math.abs(Math.cos(rads));
+        int w = img.getWidth();
+        int h = img.getHeight();
+        int newWidth = (int) Math.floor(w * cos + h * sin);
+        int newHeight = (int) Math.floor(h * cos + w * sin);
+
+        PImage result = this.createImage(newWidth, newHeight, RGB);
+        //BufferedImage rotated = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage rotated = (BufferedImage) result.getNative();
+        Graphics2D g2d = rotated.createGraphics();
+        AffineTransform at = new AffineTransform();
+        at.translate((newWidth - w) / 2, (newHeight - h) / 2);
+
+        int x = w / 2;
+        int y = h / 2;
+
+        at.rotate(rads, x, y);
+        g2d.setTransform(at);
+        g2d.drawImage(img, 0, 0, null);
+        g2d.dispose();
+        for (int i = 0; i < newWidth; i++) {
+            for (int j = 0; j < newHeight; j++) {
+                result.set(i, j, rotated.getRGB(i, j));
+            }
+        }
+
+        return result;
+    }
 }
