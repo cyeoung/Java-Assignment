@@ -1,109 +1,277 @@
+package Tanks;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import java.util.List;
+import java.util.ArrayList;
+
 public class Tank {
-    private String color;
-    private String turret;
-    private int fuelConsumption = 1;
-    private int parachute;
-    private int health;
-    private int power;
-    private float x, float y, float rotationAngle;
-    private final int INITIAL_FUEL = 250; //movement consumes 1 unit
-    private final int INITIAL_HEALTH = 100; // it is also maximum health
-    private final int INITIAL_POWER = 50;
-    private final int INITIAL_PARACHUTES = 3; 
-    /**If using a parachute, the tank descends at a rate of 60 pixels per second 
-     * and sustains no damage. If no parachutes are available, 
-     * it descends at a rate of 120 pixels per second and 
-     * sustains damage of 1hp for each pixel of height 
-     * (this is added as score to the player who fired the projectile 
-     * that caused the terrain to be destroyed). */
-    public Tank(String color, String turret, int fuelConsumption, int parachute, int health, int power) {
-        this.color = color;
-        this.turret = turret;
-        this.fuelConsumption = fuelConsumption;
-        this.parachute = parachute;
-        this.health = health;
-        this.power = power;
-    }
+    private PApplet parent;
+    public float x, y;
+    public float turretAngle;
+    public int health;
+    public int fuel;
+    public int power;
+    private List<Projectile> projectiles = new ArrayList<>(); // Define projectiles
+    private static final int NUM_PLAYERS = 4; // Define NUM_PLAYERS
+    private static int currentPlayer = 0;
+    private static final float FALL_RATE = 120.0f;
+    List<Float> terrainHeights = new ArrayList<>();
+    private static final float AIM_RATE = 3.0f;
+    private static final float MOVE_SPEED = 60.0f;
+    private static final float DESCENT_RATE_WITH_PARACHUTE = 60.0f; // Descent rate with parachute in pixels per second
+    private static final int INITIAL_PARACHUTES = 3;
+    public PImage parachuteImage;
 
-    public String getColor() {
-        return color;
-    }
+    private int parachutes; // Number of parachutes available
+    private boolean isInAir;
 
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public String getTurret() {
-        return turret;
-    }
-
-    public void setTurret(String turret) {
-        this.turret = turret;
-    }
-
-    public int getFuelConsumption() {
-        return fuelConsumption;
-    }
-
-    public void setFuelConsumption(int fuelConsumption) {
-        this.fuelConsumption = fuelConsumption;
-    }
-
-    public int getParachute() {
-        return parachute;
-    }
-
-    public void setParachute(int parachute) {
-        this.parachute = parachute;
+    public Tank(PApplet parent, float startX, float startY, List<Float> terrainHeights, PImage parachuteImage) {
+        this.parent = parent;
+        this.x = startX;
+        this.y = startY;
+        this.terrainHeights = terrainHeights;
+        this.turretAngle = 0;
+        this.health = 100;
+        this.fuel = 250;
+        this.power = 50;
+        this.parachutes = INITIAL_PARACHUTES; // Initialize with 3 parachutes
+        this.isInAir = true;
+        this.parachuteImage = parachuteImage; // Set the parachute image
+        updateVerticalPosition();
     }
 
     public int getHealth() {
         return health;
     }
 
-    public void setHealth(int health) {
-        this.health = health;
+    public int getScore() {
+        return 0; // Return a default score of 0
     }
 
     public int getPower() {
         return power;
     }
 
-    public void setPower(int power) {
-        this.power = power;
+    private void fallToTerrain() {
+        int col = (int) (x); // Use the CELLSIZE constant
+
+        // Ensure col is within the bounds of terrainHeights
+        if (col >= 0 && col < terrainHeights.size()) {
+            float terrainY = terrainHeights.get(col);
+//            System.out.println("Tank position: x=" + x + ", y=" + y + ", terrainY=" + terrainY);
+            if (y < terrainY) {
+                float fallDistance = Math.min(FALL_RATE, terrainY - y);
+                y += fallDistance; // Move downwards
+//                health -= fallDistance; // Decrease health
+                if (health < 0) health = 0; // Ensure health doesn't go below 0
+            }
+        } else {
+            // Handle the case when col is out of bounds
+            System.err.println("Column index out of bounds: " + col + " for x: " + x);
+        }
+    }
+
+    public void moveLeft(float deltaTime) {
+        if (fuel > 0) {
+            float distance = MOVE_SPEED * deltaTime;
+            x -= distance;
+            updateVerticalPosition();
+            fuel -= 1;
+        }
+    }
+
+    public void moveRight(float deltaTime) {
+        if (fuel > 0) {
+            float distance = MOVE_SPEED * deltaTime;
+            x += distance;
+            updateVerticalPosition();
+            fuel -= 1;
+        }
+    }
+
+    public void aimUp(float deltaTime) {
+        turretAngle -= AIM_RATE * deltaTime;
+    }
+
+    public void aimDown(float deltaTime) {
+        turretAngle += AIM_RATE * deltaTime;
     }
 
 
+    public void increasePower() {
+        if (power < health) {
+            power += 36;
+        }
+        if (power >= 100) {
+            power = 100;
+        }
+    }
 
-    public void turretMovement(){
+    public void decreasePower() {
+        if (power > 0) {
+            power -= 36;
+        }
+        if (power <= 0) {
+            power = 0;
+        }
+    }
+
+    public void fire() {
+        System.out.println("Firing at angle " + turretAngle + " with power " + power);
+    }
+
+    public void fireProjectile() {
+        float angle = turretAngle;
+        float speed = power;
+        if (speed > health) {
+            speed = health;
+        }
+        Projectile projectile = new Projectile(parent, x, y, angle, speed);
+        projectiles.add(projectile);
+        fuel -= 10;
+        power = 0;
+        currentPlayer++;
+        if (currentPlayer > NUM_PLAYERS - 1) {
+            currentPlayer = 0;
+        }
+    }
+
+    private void updateVerticalPosition() {
+        int col = (int)(x);
+
+        // Ensure col is within the bounds of terrainHeights
+        if (col >= 0 && col < terrainHeights.size()) {
+            y = terrainHeights.get(col); // Update the vertical position to match the terrain
+        } else {
+            System.err.println("Column index out of bounds: " + col + " for x: " + x);
+        }
+    }
+
+    public void drawProjectiles() {
+        for (Projectile projectile : projectiles) {
+            projectile.update();
+            projectile.display();
+            if (projectile.isOffScreen()) {
+                projectiles.remove(projectile);
+            }
+        }
+    }
+
+    public void displayProjectiles() {
+        for (Projectile projectile : projectiles) {
+            projectile.display();
+        }
+    }
+
+    public void removeProjectile(Projectile projectile) {
+        projectiles.remove(projectile);
+    }
+
+    // Ensure these methods are defined
+    public void displayA() {
+        if (isInAir && parachutes > 0) {
+            parent.image(parachuteImage, x, y - 40, 30, 30); // Adjust the position and size as needed
+        }
+
+        // Update position based on terrain
+        fallToTerrain();
+
+        // Draw tank body as a trapezoid
+        parent.fill(0,0,255); // Yellow for example
+        parent.quad(x + 20, y,       // Top-left corner
+                x - 20, y,       // Top-right corner
+                x - 10, y - 15,  // Bottom-right corner
+                x + 10, y - 15); // Bottom-left corner
+
+        // Draw tank turret
+        parent.fill(0); // Black turret
+        parent.pushMatrix();
+        parent.translate(x, y); // Move the origin to the center top of the tank
+        parent.rotate(turretAngle);
+        parent.rect(-2, -30, 4, 15); // Adjust turret position relative to the new origin
+        parent.popMatrix();
 
     }
 
-    public void powerUpHealth(){
-
+    public void update(float deltaTime) {
+        if (isInAir) {
+            if (parachutes > 0) {
+                y += DESCENT_RATE_WITH_PARACHUTE * deltaTime;
+                if (y >= terrainHeights.get(Math.round(x)) - 15) {
+                    y = terrainHeights.get(Math.round(x)) - 15; // Land the tank
+                    isInAir = false;
+                    parachutes--; // Use a parachute
+                }
+            } else {
+                y += FALL_RATE * deltaTime;
+                health -= FALL_RATE * deltaTime; // Damage the tank
+                if (y >= terrainHeights.get(Math.round(x)) - 15) {
+                    y = terrainHeights.get(Math.round(x)) - 15; // Land the tank
+                    isInAir = false;
+                }
+            }
+        }
     }
 
-    public void powerUpFuel(){
+    public void displayB() {
+        // Update position based on terrain
+        fallToTerrain();
 
+        // Draw tank body as a trapezoid
+        parent.fill(255,0,0); // Yellow for example
+        parent.quad(x + 20, y,       // Top-left corner
+                x - 20, y,       // Top-right corner
+                x - 10, y - 15,  // Bottom-right corner
+                x + 10, y - 15); // Bottom-left corner
+
+        // Draw tank turret
+        parent.fill(0); // Black turret
+        parent.pushMatrix();
+        parent.translate(x, y); // Move the origin to the center top of the tank
+        parent.rotate(turretAngle);
+        parent.rect(-2, -30, 4, 15); // Adjust turret position relative to the new origin
+        parent.popMatrix();
     }
 
-    public void powerUpParachute(){
+    public void displayC() {
+        // Update position based on terrain
+        fallToTerrain();
 
+        // Draw tank body as a trapezoid
+        parent.fill(0,255,255); // Yellow for example
+        parent.quad(x + 20, y,       // Top-left corner
+                x - 20, y,       // Top-right corner
+                x - 10, y - 15,  // Bottom-right corner
+                x + 10, y - 15); // Bottom-left corner
+
+        // Draw tank turret
+        parent.fill(0); // Black turret
+        parent.pushMatrix();
+        parent.translate(x, y); // Move the origin to the center top of the tank
+        parent.rotate(turretAngle);
+        parent.rect(-2, -30, 4, 15); // Adjust turret position relative to the new origin
+        parent.popMatrix();
     }
 
-    public void powerUpProjectile(){
+    public void displayD() {
+        // Update position based on terrain
+        fallToTerrain();
 
+        // Draw tank body as a trapezoid
+        parent.fill(255,255,0); // Yellow for example
+        parent.quad(x + 20, y,       // Top-left corner
+                x - 20, y,       // Top-right corner
+                x - 10, y - 15,  // Bottom-right corner
+                x + 10, y - 15); // Bottom-left corner
+
+        // Draw tank turret
+        parent.fill(0); // Black turret
+        parent.pushMatrix();
+        parent.translate(x, y); // Move the origin to the center top of the tank
+        parent.rotate(turretAngle);
+        parent.rect(-2, -30, 4, 15); // Adjust turret position relative to the new origin
+        parent.popMatrix();
     }
 }
 
-/**
- * public Tower(float range, 
- * float firingSpeed,
- *  int damage,
- *  int rangeLevel,
- *  int speedLevel,
- *  int damageLevel,
- *  int row, 
- * int col,
- *  PImage fireball
- * */
